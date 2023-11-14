@@ -1,7 +1,8 @@
 package com.kmt.app.controller;
 
 import com.kmt.app.entity.QueueMessage;
-import com.kmt.app.service.SimpleQueueMessageService;
+import com.kmt.app.service.DequeueTimeoutException;
+import com.kmt.app.service.DistributedQueueMessageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +12,9 @@ import java.util.Optional;
 @RequestMapping("/api")
 public class QueueMessageController {
     
-    private final SimpleQueueMessageService queueMessageService;
+    private final DistributedQueueMessageService queueMessageService;
     
-    public QueueMessageController(SimpleQueueMessageService queueMessageService) {
+    public QueueMessageController(DistributedQueueMessageService queueMessageService) {
         this.queueMessageService = queueMessageService;
     }
     
@@ -32,9 +33,17 @@ public class QueueMessageController {
             Optional<QueueMessage> maybeMessage = queueMessageService.dequeue(queueName, timeout);
             return maybeMessage.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
-        } catch (SimpleQueueMessageService.DequeueTimeoutException e) {
+        } catch (DequeueTimeoutException e) {
             return ResponseEntity.noContent().build();
         }
     }
     
+    @DeleteMapping(name = "/{queueName}/{messageId}")
+    public ResponseEntity<Void> remove(
+        @PathVariable String queueName,
+        @PathVariable String messageId) {
+        queueMessageService.remove(queueName, messageId);
+        return ResponseEntity.ok().build();
+    }
+
 }

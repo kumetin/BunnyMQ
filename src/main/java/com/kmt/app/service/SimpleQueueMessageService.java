@@ -10,10 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+
 @Service
 public class SimpleQueueMessageService {
-    
-    public static class DequeueTimeoutException extends Exception {}
     
     private final Map<String, BlockingQueue<QueueMessage>> queues = new ConcurrentHashMap<>();
     
